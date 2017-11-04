@@ -11,18 +11,22 @@
 static void serial_read_thread(void *param)
 {
 	char rc = 'q';
+	char sData[30];
+
 	serial_t    sobj;
 	serial_init(&sobj,UART_TX,UART_RX);
-	serial_baud(&sobj,38400);
+	serial_baud(&sobj,9600);
 	serial_format(&sobj, 8, ParityNone, 1);
 	int loops = 0;
+	unsigned int charsRecieved;
 	while (1)
 	{
 		printf("Serial loop: %d\n",loops);
 		//rc = serial_getc(&sobj); //Not working, mot sure why
-		printf("Serial Received: ");
-		printf(rc);
-		printf("\n");
+		charsRecieved = serial_recv_blocked(&sobj, sData, 29, 2000);
+		sData[charsRecieved] = '\0';
+		rc = sData[0];
+		printf("Serial Received: %s\n", sData);
 		loops++;
 		vTaskDelay(5000);
 	}
