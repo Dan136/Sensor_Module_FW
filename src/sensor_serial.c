@@ -11,7 +11,8 @@
 static void serial_read_thread(void *param)
 {
 	char rc = 'q';
-	char sData[30];
+	char sData[300];
+	char* dataToSend;
 
 	serial_t    sobj;
 	serial_init(&sobj,UART_TX,UART_RX);
@@ -23,13 +24,37 @@ static void serial_read_thread(void *param)
 	{
 		printf("Serial loop: %d\n",loops);
 		//rc = serial_getc(&sobj); //Not working, mot sure why
-		charsRecieved = serial_recv_blocked(&sobj, sData, 29, 2000);
-		sData[charsRecieved] = '\0';
-		rc = sData[0];
-		printf("Serial Received: %s\n", sData);
+		charsRecieved = serial_recv_blocked(&sobj, sData, 2*SENSOR_PACKET_SIZE, 3000);
+		serial_clear_rx(&sobj);
+		dataToSend = get_data_loc(sData, charsRecieved);
+		//sData[charsRecieved] = '\0';
+		if(dataToSend == 0){
+			printf("Serial Received: No Terminator Found\n");
+			//sData[charsRecieved]='\0';
+			//dataToSend = sData;
+		}
+		else
+		{
+			printf("Serial Received: %d characters \n%s", charsRecieved,  dataToSend);
+		}
 		loops++;
 		vTaskDelay(5000);
 	}
+}
+
+char* get_data_loc(char* buffer_contents, int size)
+{
+	int i = size - 1;
+	while (i > 0)
+	{
+		if (buffer_contents[i]==PACKET_TERMINATION_CHAR)
+		{
+			buffer_contents[i] = '\0'; //Change end char to null for string termination
+			return buffer_contents + (i>SENSOR_PACKET_SIZE-1 ? i-SENSOR_PACKET_SIZE : 0);
+		}
+		i--;
+	}
+	return 0;
 }
 
 void start_serial_thread()
