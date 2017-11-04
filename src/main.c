@@ -9,6 +9,8 @@
 #include "netif.h"
 #include "example_socket_tcp_trx.h"
 #include <platform/platform_stdlib.h>
+#include "sensor_serial.h"
+#include "sensor_wifi.h"
 
 #define STACKSIZE                   (512 + 768)
 #if CONFIG_LWIP_LAYER
@@ -63,14 +65,15 @@ void scanNetworks(void)
 		printf("moving on 2...");
 		vTaskDelete(NULL);
 		// Show Wi-Fi info.
-		//rtw_wifi_setting_t setting;
-		//wifi_get_setting(WLAN0_NAME,&setting);
-		//wifi_show_setting(WLAN0_NAME,&setting);
+		rtw_wifi_setting_t setting;
+		wifi_get_setting(WLAN0_NAME,&setting);
+		wifi_show_setting(WLAN0_NAME,&setting);
 
 }
 
 void main(void)
 {
+	printf("\nInitializing Sensor Board Firmware...\n\n");
 	//Initialize console
 	console_init();
 	//Initialize LwIP
@@ -78,6 +81,8 @@ void main(void)
 	//Initialize wifi manager
 	wifi_manager_init();
 	//example_httpc();
+	start_serial_thread();
+	start_sensor_wifi();
 
 #if defined(CONFIG_WIFI_NORMAL) && defined(CONFIG_NETWORK)
 	//Create scan networks task
