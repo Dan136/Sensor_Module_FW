@@ -15,10 +15,10 @@ static _sema tcp_tx_rx_sema;
 static void tx_thread(void *param)
 {
 	int client_fd = * (int *) param;
-	unsigned char buffer[1024];
+	unsigned char buffer[2];
 	memset(buffer, 2, sizeof(buffer));
 	printf("\n%s start\n", __FUNCTION__);
-
+	int loop = 0;
 	while(1) {
 		int ret = 0;
 
@@ -27,11 +27,11 @@ static void tx_thread(void *param)
 		ret = send(client_fd, buffer, sizeof(buffer), 0); 
 		//RtlUpSema(&tcp_tx_rx_sema);		
 		rtw_up_sema(&tcp_tx_rx_sema);
-
-		if(ret <= 0)
-			goto exit;
-
-		vTaskDelay(100);
+		memset(buffer, loop, sizeof(buffer));
+		//if(ret <= 0)
+		//	goto exit;
+		loop++;
+		vTaskDelay(1000);
 	}
 
 exit:
@@ -97,13 +97,9 @@ static void example_socket_tcp_trx_thread(void *param)
 		printf("ERROR: listen\n");
 		goto exit;
 	}
-	printf("\nExample: socket tx/rx place 3\n");
 	while(1) {
-		printf("\nExample: socket tx/rx place 3.5\n");
 		client_addr_size = sizeof(client_addr);
-		printf("\nExample: socket tx/rx place 3.75\n");
 		client_fd = accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_size);
-		printf("\nExample: socket tx/rx place 4\n");
 		if(client_fd >= 0) {
 			tx_exit = 1;
 			rx_exit = 1;
@@ -114,7 +110,6 @@ static void example_socket_tcp_trx_thread(void *param)
 				printf("\n\r%s xTaskCreate(tx_thread) failed", __FUNCTION__);
 			else
 				tx_exit = 0;
-			printf("\nExample: socket tx/rx place 4\n");
 			vTaskDelay(10);
 
 			if(xTaskCreate(rx_thread, ((const char*)"rx_thread"), 512, &client_fd, tskIDLE_PRIORITY + 1, NULL) != pdPASS)

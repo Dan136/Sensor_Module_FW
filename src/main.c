@@ -38,6 +38,8 @@ void scanNetworks(void)
 		*	1. Enable Wi-Fi with STA mode
 		**********************************************************************************/
 		printf("\n\r[WLAN_SCENARIO_EXAMPLE] Enable Wi-Fi\n");
+		wifi_on(RTW_MODE_STA); //Resets wifi so we dont get errors
+		wifi_off(); //Resets wifi to avoid errors due to warm start
 		if(wifi_on(RTW_MODE_STA) < 0){
 			printf("\n\r[WLAN_SCENARIO_EXAMPLE] ERROR: wifi_on failed\n");
 			return;
@@ -57,18 +59,15 @@ void scanNetworks(void)
 		password = "testtest";
 		if(wifi_connect(ssid, RTW_SECURITY_WPA2_AES_PSK, password, strlen(ssid), strlen(password), -1, NULL) == RTW_SUCCESS)
 		{
-			printf("moving on...");
+			printf("WiFi Connected!");
 			//ethernetif_init(&xnetif[0]);
 			//xnetif[0].flags |= 0x20U;
 			LwIP_DHCP(0, DHCP_START);
 		}
-		printf("moving on 2...");
+		else {
+			printf("Error connecting to WIFI!");
+		}
 		vTaskDelete(NULL);
-		// Show Wi-Fi info.
-		rtw_wifi_setting_t setting;
-		wifi_get_setting(WLAN0_NAME,&setting);
-		wifi_show_setting(WLAN0_NAME,&setting);
-
 }
 
 void main(void)

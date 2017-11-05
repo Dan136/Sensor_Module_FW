@@ -23,15 +23,11 @@ static void serial_read_thread(void *param)
 	while (1)
 	{
 		printf("Serial loop: %d\n",loops);
-		//rc = serial_getc(&sobj); //Not working, mot sure why
 		charsRecieved = serial_recv_blocked(&sobj, sData, 2*SENSOR_PACKET_SIZE, 3000);
 		serial_clear_rx(&sobj);
 		dataToSend = get_data_loc(sData, charsRecieved);
-		//sData[charsRecieved] = '\0';
 		if(dataToSend == 0){
-			printf("Serial Received: No Terminator Found\n");
-			//sData[charsRecieved]='\0';
-			//dataToSend = sData;
+			printf("Serial Received: No Terminator Found\n"); //Error with data
 		}
 		else
 		{
