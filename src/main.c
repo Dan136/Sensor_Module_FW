@@ -25,50 +25,9 @@ extern void console_init(void);
   * @retval None
   */
 
-char* ssid;
-char* password;
 
 static rtw_result_t scan_result_handler(rtw_scan_handler_result_t* malloced_scan_result);
 
-
-void scanNetworks(void)
-{
-	printf("\n\n[WLAN_SCENARIO_EXAMPLE] Wi-Fi example scenario case 3...\n");
-		/*********************************************************************************
-		*	1. Enable Wi-Fi with STA mode
-		**********************************************************************************/
-		printf("\n\r[WLAN_SCENARIO_EXAMPLE] Enable Wi-Fi\n");
-		wifi_on(RTW_MODE_STA); //Resets wifi so we dont get errors
-		wifi_off(); //Resets wifi to avoid errors due to warm start
-		if(wifi_on(RTW_MODE_STA) < 0){
-			printf("\n\r[WLAN_SCENARIO_EXAMPLE] ERROR: wifi_on failed\n");
-			return;
-		}
-		vTaskDelay(5000);//Seems to be needed, not sure why
-		/**********************************************************************************
-		*	3. Connect to AP use STA mode (If failed, re-connect one time.)
-		**********************************************************************************/
-		printf("\n\r[WLAN_SCENARIO_EXAMPLE] Connect to AP use STA mode\n");
-
-		// Set the auto-reconnect mode with retry 1 time(limit is 2) and timeout 5 seconds.
-		// This command need to be set before invoke wifi_connect() to make reconnection work.
-		wifi_config_autoreconnect(1, 2, 5);
-
-		// Connect to AP with PSK-WPA2-AES.
-		ssid = "WLAN_Test";
-		password = "testtest";
-		if(wifi_connect(ssid, RTW_SECURITY_WPA2_AES_PSK, password, strlen(ssid), strlen(password), -1, NULL) == RTW_SUCCESS)
-		{
-			printf("WiFi Connected!");
-			//ethernetif_init(&xnetif[0]);
-			//xnetif[0].flags |= 0x20U;
-			LwIP_DHCP(0, DHCP_START);
-		}
-		else {
-			printf("Error connecting to WIFI!");
-		}
-		vTaskDelete(NULL);
-}
 
 void main(void)
 {
@@ -79,14 +38,14 @@ void main(void)
 	LwIP_Init();
 	//Initialize wifi manager
 	wifi_manager_init();
+	if(xTaskCreate(start_sensor_wifi, ((const char*)"Sensor WiFI"), STACKSIZE, NULL, tskIDLE_PRIORITY + 3 + PRIORITIE_OFFSET, NULL) != pdPASS)
+		printf("\n\r%s xTaskCreate(start_sensor_wifi) failed", __FUNCTION__);
 	//example_httpc();
 	start_serial_thread();
-	start_sensor_wifi();
 
 #if defined(CONFIG_WIFI_NORMAL) && defined(CONFIG_NETWORK)
 	//Create scan networks task
-	if(xTaskCreate(scanNetworks, ((const char*)"init"), STACKSIZE, NULL, tskIDLE_PRIORITY + 3 + PRIORITIE_OFFSET, NULL) != pdPASS)
-			printf("\n\r%s xTaskCreate(init_thread) failed", __FUNCTION__);
+	//
 	//vTaskDelete(NULL);
 	printf("Wifi Started");
 	printf("starting tcp example");
