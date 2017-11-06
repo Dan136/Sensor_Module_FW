@@ -40,17 +40,9 @@ void main(void)
 	wifi_manager_init();
 	if(xTaskCreate(start_sensor_wifi, ((const char*)"Sensor WiFI"), STACKSIZE, NULL, tskIDLE_PRIORITY + 3 + PRIORITIE_OFFSET, NULL) != pdPASS)
 		printf("\n\r%s xTaskCreate(start_sensor_wifi) failed", __FUNCTION__);
-	//example_httpc();
 	start_serial_thread();
-
-#if defined(CONFIG_WIFI_NORMAL) && defined(CONFIG_NETWORK)
-	//Create scan networks task
-	//
-	//vTaskDelete(NULL);
-	printf("Wifi Started");
 	printf("starting tcp example");
 	example_socket_tcp_trx_1();
-#endif
 
 
     //3 3)Enable Schedule, Start Kernel
