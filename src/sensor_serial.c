@@ -32,6 +32,10 @@ static void serial_read_thread(void *param)
 		else
 		{
 			printf("Serial Received: %d characters \n%s", charsRecieved,  dataToSend);
+			BaseType_t wifiBufPass = pdFAIL;
+			while(wifiBufPass != pdPASS){ // attempt write to wifi buf until success
+				wifiBufPass = write_wifi_buffer(dataToSend);
+			}
 		}
 		loops++;
 		vTaskDelay(5000);
@@ -41,12 +45,12 @@ static void serial_read_thread(void *param)
 char* get_data_loc(char* buffer_contents, int size)
 {
 	int i = size - 1;
-	while (i > 0)
+	while (i > 0) // while there is at least one char before possible termination char
 	{
 		if (buffer_contents[i]==PACKET_TERMINATION_CHAR)
 		{
 			buffer_contents[i] = '\0'; //Change end char to null for string termination
-			return buffer_contents + (i>SENSOR_PACKET_SIZE-1 ? i-SENSOR_PACKET_SIZE : 0);
+			return buffer_contents + (i>SENSOR_PACKET_SIZE-1 ? i-SENSOR_PACKET_SIZE : 0);  //conditional guard against partial packet causing access to uninitialized mem
 		}
 		i--;
 	}
