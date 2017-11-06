@@ -80,13 +80,13 @@ static void example_socket_tcp_trx_thread(void *param)
 
 	// Delay to wait for IP by DHCP
 	vTaskDelay(10000);
-	printf("\nExample: socket tx/rx 1\n");
+	//printf("\nExample: socket tx/rx 1\n");
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	printf("\nExample: socket tx/rx place 2\n");
+	//printf("\nExample: socket tx/rx place 2\n");
 
 	if(bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
 		printf("ERROR: bind\n");
