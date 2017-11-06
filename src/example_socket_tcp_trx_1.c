@@ -56,14 +56,14 @@ static void rx_thread(void *param)
 		getsockopt(client_fd, SOL_SOCKET, SO_ERROR, &sock_err, &err_len);
 		//RtlUpSema(&tcp_tx_rx_sema);		
 		rtw_up_sema(&tcp_tx_rx_sema);
-		printf(buffer);
+		//printf(buffer);
 		// ret == -1 and socket error == EAGAIN when no data received for nonblocking
 		if((ret == -1) && (sock_err == EAGAIN))
 			continue;
 		else if(ret <= 0)
 			goto exit;
 
-		vTaskDelay(10);
+		vTaskDelay(1000);
 	}
 
 exit:
@@ -101,6 +101,7 @@ static void example_socket_tcp_trx_thread(void *param)
 		client_addr_size = sizeof(client_addr);
 		client_fd = accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_size);
 		if(client_fd >= 0) {
+			printf("EXAMPLE SOCKET OUTER LOOP");
 			tx_exit = 1;
 			rx_exit = 1;
 			//RtlInitSema(&tcp_tx_rx_sema, 1);			
@@ -112,10 +113,8 @@ static void example_socket_tcp_trx_thread(void *param)
 				tx_exit = 0;
 			vTaskDelay(10);
 
-			if(xTaskCreate(rx_thread, ((const char*)"rx_thread"), 512, &client_fd, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-				printf("\n\r%s xTaskCreate(rx_thread) failed", __FUNCTION__);
-			else
-				rx_exit = 0;
+			//if(xTaskCreate(rx_thread, ((const char*)"rx_thread"), 512, &client_fd, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
+			//	printf("\n\r%s xTaskCreate(rx_thread) failed", __FUNCTION__);
 
 			while(1) {
 				if(tx_exit && rx_exit) {
@@ -136,8 +135,3 @@ exit:
 	vTaskDelete(NULL);
 }
 
-void example_socket_tcp_trx_1(void)
-{
-	if(xTaskCreate(example_socket_tcp_trx_thread, ((const char*)"example_socket_tcp_trx_thread"), 1024, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-		printf("\n\r%s xTaskCreate(example_socket_tcp_trx_thread) failed", __FUNCTION__);
-}
