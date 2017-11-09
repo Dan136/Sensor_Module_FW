@@ -11,6 +11,11 @@
 #include <lwip/sockets.h>
 //#include <osdep_api.h>
 #include <osdep_service.h>
+//Includes for LED
+#include "device.h"
+#include "gpio_api.h"
+
+#define GPIO_LED_PIN       PC_3
 
 static SemaphoreHandle_t wifiBufSem = 0;
 static char wifiBuf[50];
@@ -41,6 +46,11 @@ void start_sensor_wifi()
 
 int connect_to_network()
 {
+	gpio_t gpio_led;
+	gpio_init(&gpio_led, GPIO_LED_PIN);
+	gpio_dir(&gpio_led, PIN_OUTPUT);    // Direction: Output
+	gpio_mode(&gpio_led, PullNone);     // No pull
+	gpio_write(&gpio_led, 0);
 	wifi_on(RTW_MODE_STA); //Resets wifi so we dont get errors
 	wifi_off(); //Resets wifi to avoid errors due to warm start
 	if(wifi_on(RTW_MODE_STA) < 0){
@@ -58,10 +68,12 @@ int connect_to_network()
 	{
 		printf("WiFi Connected!");
 		LwIP_DHCP(0, DHCP_START);
+		gpio_write(&gpio_led, 1);
 		vTaskDelay(2000);
 	}
 	else {
 		printf("Error connecting to WIFI!");
+		gpio_write(&gpio_led, 0);
 		return 0;
 	}
 	return 1;
