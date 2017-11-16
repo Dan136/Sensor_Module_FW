@@ -377,7 +377,6 @@ SRC_C += $(AMEBA_SDK_LOC)/component/common/file_system/fatfs/disk_if/src/sdcard.
 SRC_C += $(AMEBA_SDK_LOC)/component/common/application/xmodem/uart_fw_update.c
 
 #user 
-SRC_C += ../src/example_httpc.c
 SRC_C += ../src/example_socket_tcp_trx_1.c
 SRC_C += ../src/sensor_serial.c
 SRC_C += ../src/sensor_wifi.c
