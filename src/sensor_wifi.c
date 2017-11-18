@@ -57,10 +57,9 @@ int connect_to_network()
 		printf("\n\r[WIFI] ERROR: wifi_on failed\n");
 		return 0;
 	}
-	vTaskDelay(5000);
 	// Set the auto-reconnect mode with retry 1 time(limit is 2) and timeout 5 seconds.
 	// This command need to be set before invoke wifi_connect() to make reconnection work.
-	wifi_config_autoreconnect(1, 2, 5);
+	wifi_config_autoreconnect(1, 525600, 60);
 	// Connect to AP with PSK-WPA2-AES.
 	ssid = "WLAN_Test";
 	password = "testtest";
