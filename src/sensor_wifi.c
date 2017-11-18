@@ -24,29 +24,24 @@ static char wifiBufSendFlag;
 char* ssid;
 char* password;
 
-static void wifi_socket_thread(void *param)
-{
-	int loops = 0;
-	while (1)
-	{
-		//printf("WiFi loop: %d\n",loops);
-		loops++;
-		vTaskDelay(10000);
-	}
-}
+static gpio_t gpio_led;
+
+
 
 void start_sensor_wifi()
 {
 	connect_to_network();
 	wifiBufSem = xSemaphoreCreateMutex(); // initialize semaphore
-	if(xTaskCreate(wifi_socket_thread, ((const char*)"WiFi Socket Thread"), 2048, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-			printf("\n\r%s xTaskCreate(wifi_socket_thread) failed", __FUNCTION__);
-	vTaskDelete(NULL);
+	while (1)
+	{
+		//Sets led to off if disconnected, on if connected
+		gpio_write(&gpio_led, ~(wifi_is_connected_to_ap()));
+		vTaskDelay(10000);
+	}
 }
 
 int connect_to_network()
 {
-	gpio_t gpio_led;
 	gpio_init(&gpio_led, GPIO_LED_PIN);
 	gpio_dir(&gpio_led, PIN_OUTPUT);    // Direction: Output
 	gpio_mode(&gpio_led, PullNone);     // No pull
