@@ -41,7 +41,7 @@ void main(void)
 		printf("\n\r%s xTaskCreate(start_sensor_wifi) failed", __FUNCTION__);
 	start_serial_thread();
 	printf("Starting TCP Thread");
-	example_socket_tcp_trx_1();
+	start_tcp_socket();
 
 
     //Start task scheduler

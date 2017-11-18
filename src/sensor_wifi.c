@@ -129,7 +129,7 @@ exit:
 
 
 
-static void example_socket_tcp_trx_thread(void *param)
+static void tcp_socket_thread(void *param)
 {
 	int server_fd = -1, client_fd = -1;
 	struct sockaddr_in server_addr, client_addr;
@@ -137,13 +137,11 @@ static void example_socket_tcp_trx_thread(void *param)
 
 	// Delay to wait for IP by DHCP
 	vTaskDelay(10000);
-	//printf("\nExample: socket tx/rx 1\n");
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	//printf("\nExample: socket tx/rx place 2\n");
 
 	if(bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
 		printf("ERROR: bind\n");
@@ -160,7 +158,6 @@ static void example_socket_tcp_trx_thread(void *param)
 		if(client_fd >= 0) {
 			printf("EXAMPLE SOCKET OUTER LOOP");
 			tx_exit = 1;
-			//RtlInitSema(&tcp_tx_rx_sema, 1);
 			rtw_init_sema(&tcp_tx_rx_sema, 1);
 
 			if(xTaskCreate(tx_thread, ((const char*)"tx_thread"), 512, &client_fd, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
@@ -168,9 +165,6 @@ static void example_socket_tcp_trx_thread(void *param)
 			else
 				tx_exit = 0;
 			vTaskDelay(10);
-
-			//if(xTaskCreate(rx_thread, ((const char*)"rx_thread"), 512, &client_fd, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-			//	printf("\n\r%s xTaskCreate(rx_thread) failed", __FUNCTION__);
 
 			while(1) {
 				if(tx_exit) {
@@ -180,8 +174,6 @@ static void example_socket_tcp_trx_thread(void *param)
 				else
 					vTaskDelay(1000);
 			}
-			printf("\nExample: socket tx/rx place loop\n");
-			//RtlFreeSema(&tcp_tx_rx_sema);
 			rtw_free_sema(&tcp_tx_rx_sema);
 		}
 	}
@@ -192,8 +184,8 @@ exit:
 }
 
 
-void example_socket_tcp_trx_1(void)
+void start_tcp_socket(void)
 {
-	if(xTaskCreate(example_socket_tcp_trx_thread, ((const char*)"example_socket_tcp_trx_thread"), 1024, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
+	if(xTaskCreate(tcp_socket_thread, ((const char*)"example_socket_tcp_trx_thread"), 1024, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
 		printf("\n\r%s xTaskCreate(example_socket_tcp_trx_thread) failed", __FUNCTION__);
 }
