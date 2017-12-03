@@ -30,7 +30,13 @@ static rtw_result_t scan_result_handler(rtw_scan_handler_result_t* malloced_scan
 
 void main(void)
 {
-	printf("\nInitializing Sensor Board Firmware...\n\n");
+	printf("\nInitializing Sensor Board Firmware...");
+	for (int i=0; i<100000;i++) //Hack to delay boot and avoid hard fault
+	{
+		if (i%1000==0)
+			printf(".");
+	}
+	printf("\n\n");
 	//Initialize console
 	console_init();
 	//Initialize LwIP
